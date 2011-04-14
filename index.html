@@ -7,29 +7,20 @@
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/underscore.js"></script>
 <script type="text/javascript" src="js/backbone.js"></script>
-<script type="text/javascript" src="js/backbone-localstorage.js"></script>
 <script type="text/javascript" src="js/shell.js"></script>
-<script type="text/javascript" src="js/eve.js"></script>
 <script type="text/javascript" src="js/raphael.js"></script>
-<script type="text/javascript" src="js/raphael-zpd.js"></script>
+<script type="text/javascript" src="js/protovis-d3.2.js"></script>
 <script type="text/javascript" src="js/icons.js"></script>
 <script type="text/javascript" src="js/coffee-script.js"></script>
-<script type="text/coffeescript" src="coffee/shapes.coffee"></script>
-<script type="text/coffeescript" src="coffee/locals.coffee"></script>
-<script type="text/coffeescript" src="coffee/model.coffee"></script>
-<script type="text/coffeescript" src="coffee/raffi.coffee"></script>
-<script type="text/coffeescript" src="coffee/buffers.coffee"></script>
-<script type="text/coffeescript" src="coffee/taxes.coffee"></script>
-<script src="dvc.ajax.js"></script>
+<script type="text/coffeescript" src="coffee/render.coffee"></script>
+<script type="text/coffeescript" src="coffee/events.coffee"></script>
 </head>
 <body onload="init()">
 
 <div id="console">
   <div id="output">
     <div class="print">
-      Welcome to Raffi.
-      <br/>&nbsp;<br/>
-      Type <span style="color:#3ce;">help()</span> to get it.
+      This is plump.
     </div>
   </div>
   <div id="input_wrap">
@@ -38,13 +29,9 @@
   </div>
 </div>
 
-<div id="buttons">
-  <button id="clear" type="button">Clear</button>
-  <button id="worlds" type="button">Toggle World</button>
-  <button id="tut" type="button">Tutorial</button>
-</div>
-
-<div id="canvas"></div>
+<div id="raphael-canvas"></div>
+<div id="protovis-canvas"></div>
+<canvas id="html5-canvas"></canvas>
 
 <div id="dashboard" style="float:right;width:200px;margin:10px;position:relative;z-index:15;">
   <div class="props">
@@ -57,198 +44,5 @@
   </div>
 </div>
 
-<div id="status" style="position:fixed;bottom:10px;right:10px;z-index:15;color:#ddd;">Cursor Position</div>
-
-<div id="tables">
-  <div>Nothing here!  Try getTaxes()</div>
-</div>
-
-<div id="text">
-  <textarea id="code"></textarea>
-  <div id="tutorial">
- <p>Raphael Cheat Sheet<br/>
-  <small><a href="http://raphaeljs.com/reference.html">Full Reference</a></small></p>
-  <pre class="code">
-x    <span># x position</span>
-y    <span># x position</span>
-r    <span># radius</span>
-w    <span># width</span>
-h    <span># height</span>
-rx   <span># ellipse x-axis</span>
-ry   <span># ellipse y-axis</span>
-
-
-<span># objects</span>
-
-circle(x,y,r)
-
-rect(x, y, w, h, r)
-
-ellipse(x, y, rx, ry)
-
-image(url, x, y, w, h)
-
-text(x, y, str)
-
-
-<span># examples (run these in the blue console)</span>
-
-circle(200,200,30).fill('darkorange')
-
-rect(300,200,30,120,5).fill('azure')
-
-ellipse(400, 120, 30, 90).fill('olivedrab')
-
-text(100,100,'hi earth').attr
-  'font-size': 14
-  'fill': 'tomato'
-
-<span># paths - use <a href="http://www.w3schools.com/svg/svg_path.asp">svg path</a> string format</span>
-path("M10 10L90 90")
-
-<span># sets</span>
-st = set()
-st.push circle(30,50,10).fill('blue')
-st.push circle(50,90,10).fill('red')
-st.translate(50,50)
-  </pre>
-
-  <p>Color</p>
-  <pre>
-<span># 12 colored bars</span>
-a = []
-for i in [1..12]
-  a[i] = rect 40, 40*i, 200, 10
-  a[i].fill getColor()
-  </pre>
-
-  <p>Icons</p>
-  <pre>
-<span># Display all iconts</span>
-i = 0
-for key, value of icon
-  text(i, 200, key).stroke 'aliceblue'
-  path(value).translate(i, 230).stroke 'aliceblue'
-  i += 40
-  </pre>
-
-  <p>CoffeeScript Cheat Sheet<br/>
-  <small><a href="http://jashkenas.github.com/coffee-script/">Full Reference</a></small></p>
-  <pre class="code">
-<span># assignment</span>
-x = 4
-
-<span># functions</span>
-mult = (a,b) -> a*b
-
-<span># arrays</span>
-list = [1,2,3,4,5]
-
-<span># objects</span>
-sh =
-circ: (x,y) -> circle(x,y,15)
-sq: (x,y) -> rect(x,y,15,15)
-
-<span># new square at 75, 125</span>
-sh.sq(75,125)
-
-<span># array comprehensions</span>
-circles = (sh.circ(25*x,200) for x in [1..10])
-  </pre>
-
-  <p>Math</p>
-  <pre class="code">
-sin pi/6  <span># 0.49999 ~ 1/2</span>
-acos 1/2  <span># 1.04719 ~ pi/3</span>
-random()  <span># generate random number, 0-1</span>
-abs -5    <span># 5</span>
-pow(x,3)  <span># x^3</span>
-floor 4.5 <span># 4</span>
-ceil 5.2  <span># 6</span>
-  </pre>
-
-  <p>Connect Shapes<br/>
-  <small><a href="http://www.connectshapes.com/">Original</a></small></p>
-  <pre class="code">
-<span># create a shape</span>
-shape(x, y, width, height)
-link(int, int)
-
-<span># Example: Create three shapes.
-# Link 0 to 1, and 1 to 2</span>
-shape 50, 50, 10, 10 
-shape 200, 150, 40, 40 
-shape 400, 50, 30, 30 
-link 0, 1 
-link 1, 2 
-
-<span># Classy, takes an object and creates
-# a graphical interface for its properties</span>
-classy(name, object, options)
-
-<span># Example: Classy</span>
-classy 'My Object',
-  f: (x) -> 2*x
-  n: 5
-  str: "the quick brown fox"
-  nan: NaN
-  blah: {car: 'buggy', horn: 'french'}
-  huh: [4,5,'pop','bug']
-  elem: $('body')[0]
-  null: null
-  </pre>
-
-  <p>Data Visualization Competition</p>
-  <pre class="code">
-<span># get all data</span>
-getAllTaxes()
-<span># then show some data</span>
-showTaxes taxes.budgetAccount
-<span># get a 2d list of an attribute</span>
-getColumn taxes.budgetAccount, "agency"
-
-<span># or, just get a little bit of data</span>
-getTaxes("budgetAccount")
-
-<span># other data to get</span>
-getPopulation()
-getInflation()
-getGdp()
-getDebt()
-getTaxRates()
-
-<span># Some notes </span>
-
-<span># type attributes</span>
-budgetAccount
-budgetTotal
-receiptAccount
-receiptTotal
-population
-inflation
-gdp
-debt
-taxRates
-
-<span># parameter defaults</span>
-year:num, 
-type: 0 - 3, 
-sortdir: 0 - 1, 
-income:num, 
-filing: 0 - 4, 
-group: agency, bureau, function/category, subfunction/subcategory, 
-showChange: 0 - 1, 
-showExtra: 0 -1, 
-function/category:string, 
-subfunction/subcategory:string
-  
-  <span># If the type is a total, it is recommended to specify a group.
-  # If the type is a budget, use function or subfuction.
-  # If the type is a receipt, use category or subcategory.</span>
-  <span># Population, inflation, gdp and debt param: year
-  # TaxRates params: year, type</span>
-  </pre>
- 
-</div><!--tutorial-->
 </div>
 </body></html>
